@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
-import {} from 'nodemailer'
 import { MailService } from './mail.service';
+import {ConfigModule,ConfigService} from '@nestjs/config'
 @Module({
-  providers: [MailService]
+  providers: [MailService,ConfigService],
+  exports:[MailService]
 })
 export class MailModule {}

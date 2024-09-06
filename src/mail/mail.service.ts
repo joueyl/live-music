@@ -1,12 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer'
-import SMTPTransport from 'nodemailer/lib/smtp-transport';
+import {Transporter} from 'nodemailer'
+import {ConfigService} from '@nestjs/config'
 @Injectable()
 export class MailService {
-    private transport
-    constructor(){
+    private transport:Transporter
+    constructor(private readonly configService:ConfigService){
         this.transport = nodemailer.createTransport({
-            host:'smtp.163.com'
+            host:configService.get('SMTP_HOST'),
+            port:configService.get('SMTP_PORT'),
+            secure:false,
+            auth:{
+                user:configService.get('SMTP_USER'),
+                pass:configService.get('SMTP_PASS')
+            }
+        })
+    }
+    async sendMail(email:string){
+      return await  this.transport.sendMail({
+            from:'Music Live <dzb08042@163.com>',
+            to:email,
+            subject:'验证码',
+            text:'测试邮件'
         })
     }
 }
