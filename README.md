@@ -1,85 +1,197 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+---
+title: MusicLive v1.0.0
+language_tabs:
+  - shell: Shell
+  - http: HTTP
+  - javascript: JavaScript
+  - ruby: Ruby
+  - python: Python
+  - php: PHP
+  - java: Java
+  - go: Go
+toc_footers: []
+includes: []
+search: true
+code_clipboard: true
+highlight_theme: darkula
+headingLevel: 2
+generator: "@tarslib/widdershins v4.0.17"
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+---
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+# MusicLive
 
-## Description
+> v1.0.0
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Base URLs:
 
-## Project setup
+* <a href="http://127.0.0.1:3000">本地环境: http://127.0.0.1:3000</a>
 
-```bash
-$ pnpm install
+# 用户
+
+## POST 注册账号
+
+POST /user/register
+
+> Body 请求参数
+
+```yaml
+email: 1052508138@qq.com
+code: "12345"
+user_name: jouei
+
 ```
 
-## Compile and run the project
+### 请求参数
 
-```bash
-# development
-$ pnpm run start
+|名称|位置|类型|必选|说明|
+|---|---|---|---|---|
+|body|body|object| 否 |none|
+|» email|body|string| 否 |none|
+|» code|body|string| 否 |none|
+|» user_name|body|string| 否 |none|
 
-# watch mode
-$ pnpm run start:dev
+> 返回示例
 
-# production mode
-$ pnpm run start:prod
+> 200 Response
+
+```json
+{}
 ```
 
-## Run tests
+### 返回结果
 
-```bash
-# unit tests
-$ pnpm run test
+|状态码|状态码含义|说明|数据模型|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|成功|Inline|
 
-# e2e tests
-$ pnpm run test:e2e
+### 返回数据结构
 
-# test coverage
-$ pnpm run test:cov
+## POST 发送邮箱验证码
+
+POST /user/sendCode
+
+> Body 请求参数
+
+```yaml
+email: 1052508138@qq.com
+
 ```
 
-## Resources
+### 请求参数
 
-Check out a few resources that may come in handy when working with NestJS:
+|名称|位置|类型|必选|说明|
+|---|---|---|---|---|
+|body|body|object| 否 |none|
+|» email|body|string| 否 |none|
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+> 返回示例
 
-## Support
+> 200 Response
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```json
+{}
+```
 
-## Stay in touch
+### 返回结果
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+|状态码|状态码含义|说明|数据模型|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|成功|Inline|
 
-## License
+### 返回数据结构
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+# 数据模型
+
+<h2 id="tocS_Category">Category</h2>
+
+<a id="schemacategory"></a>
+<a id="schema_Category"></a>
+<a id="tocScategory"></a>
+<a id="tocscategory"></a>
+
+```json
+{
+  "id": 1,
+  "name": "string"
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|id|integer(int64)|false|none||分组ID编号|
+|name|string|false|none||分组名称|
+
+<h2 id="tocS_Tag">Tag</h2>
+
+<a id="schematag"></a>
+<a id="schema_Tag"></a>
+<a id="tocStag"></a>
+<a id="tocstag"></a>
+
+```json
+{
+  "id": 1,
+  "name": "string"
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|id|integer(int64)|false|none||标签ID编号|
+|name|string|false|none||标签名称|
+
+<h2 id="tocS_Pet">Pet</h2>
+
+<a id="schemapet"></a>
+<a id="schema_Pet"></a>
+<a id="tocSpet"></a>
+<a id="tocspet"></a>
+
+```json
+{
+  "id": 1,
+  "category": {
+    "id": 1,
+    "name": "string"
+  },
+  "name": "doggie",
+  "photoUrls": [
+    "string"
+  ],
+  "tags": [
+    {
+      "id": 1,
+      "name": "string"
+    }
+  ],
+  "status": "available"
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|id|integer(int64)|true|none||宠物ID编号|
+|category|[Category](#schemacategory)|true|none||分组|
+|name|string|true|none||名称|
+|photoUrls|[string]|true|none||照片URL|
+|tags|[[Tag](#schematag)]|true|none||标签|
+|status|string|true|none||宠物销售状态|
+
+#### 枚举值
+
+|属性|值|
+|---|---|
+|status|available|
+|status|pending|
+|status|sold|
+
