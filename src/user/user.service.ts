@@ -1,31 +1,21 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto,RegisterPrams } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import {InjectModel} from '@nestjs/mongoose'
-import {Model} from 'mongoose'
-import {User} from './user.interface'
+import { MailService } from 'src/mail/mail.service';
+import {UserService as UserDB} from '../mongodb/User.service'
+import { CodeServeice as CodeDB } from 'src/mongodb/Code.service';
 @Injectable()
 export class UserService {
-  constructor(@InjectModel('Users') private userModel:Model<User>){}
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(
+    private readonly mailservice: MailService,
+    private readonly userdb:UserDB,
+    private readonly codedb:CodeDB
+  ) {}
+  register(body:RegisterPrams){
+    console.log(this.codedb);
+    return body
   }
+  sendCode(email:string){
 
-  async findAll() {
-    const user =await this.userModel.find()
-    
-    return user;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
   }
 }
