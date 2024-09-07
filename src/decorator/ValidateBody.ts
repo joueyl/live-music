@@ -7,7 +7,7 @@ export const ValidataBody = <T extends object>(DTO:new ()=>T) =>
     const object = plainToClass(DTO,request.body)
     const error =await validate(object)
     if(error.length){
-        throw new BadRequestException('Validation failed: ' + JSON.stringify(error));
+        throw new BadRequestException(JSON.stringify(error.map(item=>item.constraints)));
     }
     return object as T
   })();

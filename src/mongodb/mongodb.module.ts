@@ -20,10 +20,12 @@ import { CodeServeice } from './Code.service';
         };
       },
     }),
-    MongooseModule.forFeature([{ name: 'User', schema: userSchema }]),
-    MongooseModule.forFeature([{name:'Code',schema:codeSchema}]),
+    MongooseModule.forFeature([
+      { name: 'User', schema: userSchema },
+      { name: 'Code', schema: codeSchema },
+    ]),
   ],
-  providers: [UserService,CodeServeice],
-  exports:[UserService,CodeServeice]
+  providers: [UserService, CodeServeice],
+  exports: [UserService, CodeServeice],
 })
 export class MongodbModule {}

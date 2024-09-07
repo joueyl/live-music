@@ -2,7 +2,6 @@ import { Controller, Post, Body, UseInterceptors } from '@nestjs/common';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
 import { RegisterPrams,SendCodePrams } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { ValidataBody } from '../decorator/ValidateBody';
 @Controller('user')
 export class UserController {
@@ -15,6 +14,6 @@ export class UserController {
   @Post('sendCode')
   @UseInterceptors(AnyFilesInterceptor())
   sendCode(@ValidataBody(SendCodePrams) body:SendCodePrams){
-    
+   return this.userService.sendCode(body.email)
   }
 }

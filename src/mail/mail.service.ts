@@ -16,12 +16,12 @@ export class MailService {
             }
         })
     }
-    async sendMail(email:string){
+    async sendMail(email:string,code:string|number){
       return await  this.transport.sendMail({
             from:'Music Live <dzb08042@163.com>',
             to:email,
-            subject:'验证码',
-            text:'测试邮件'
+            subject:`验证码`,
+            text:`验证码:${code}\n验证码两分钟后失效`
         })
     }
 }
