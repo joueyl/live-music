@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer'
-import {IsEmail, IsNumber, IsString, Matches, MaxLength, MinLength} from 'class-validator'
+import {IsEmail, IsNumber, IsOptional, IsString, Matches, MaxLength, MinLength} from 'class-validator'
 export class RegisterPrams{
     @IsString()
     @IsEmail({}, { message: '无效的邮箱地址' })
@@ -28,4 +28,15 @@ export class RegisterPrams{
 export class SendCodePrams{
     @IsString()
     readonly email:string
+}
+export class LoginParams{
+    @IsString()
+    readonly email:string
+
+    @IsString()
+    @IsOptional()
+    readonly user_name:string
+
+    @IsString()
+    pass_word:string
 }

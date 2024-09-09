@@ -8,6 +8,7 @@ export class Code extends Document{
     @Prop({required:true,type:String})
     email:string
 
+    
     @Prop({default:Date.now(),expires:'2m'})
     createAt:Date
 }

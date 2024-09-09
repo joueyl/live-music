@@ -7,6 +7,7 @@
 // });
 import {Prop, Schema,SchemaFactory} from '@nestjs/mongoose'
 import {Document} from 'mongoose'
+@Schema()
 export class User extends Document{
   @Prop({required:true,type:String,minlength:4,maxlength:10})
   user_name:string

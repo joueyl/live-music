@@ -6,7 +6,10 @@ export class ErrFilter implements ExceptionFilter{
         const ctx = host.switchToHttp()
         const request = ctx.getRequest<Request>()
         const response = ctx.getResponse<Response>()
-        const status = exception.getStatus()
+        let status = 500
+        if('getStatus' in exception ){
+            status = exception.getStatus()
+        }
         response.status(status).json({
             code:status,
             time:new Date(),
