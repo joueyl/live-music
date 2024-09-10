@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebRTC 音频流播放</title>
+  </head>
+  <body>
+    <h1>WebRTC 音频流</h1>
+
+    <audio id="audio" controls autoplay></audio>
+    <button id="start">开始播放</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+    <script>
+      const socket = io("http://localhost:3000", {
+        auth: {
+          user_name: "sdfdfasdfas",
+        },
+      });
+      let peerConnetion = new RTCPeerConnection({
+        iceServers: [{ urls: "stun:stun.l.google.com:19302" }], // 使用 Google STUN 服务器
+      });
+      socket.on("connectionSuccess", () => {
+        console.log("连接服务器成功");
+        console.log("添加监听事件");
+        addEvent();
+        console.log("传输信令");
+        initRTC()
+      });
+      function addEvent() {
+        peerConnetion.ontrack = (event)=>{
+          
+        }
+        peerConnetion.onicecandidate = (event) => {
+          if (event.candidate) {
+            socket.emit("iceCandidate", event.candidate);
+          }
+        };
+        peerConnetion.ontrack = (event) => {
+          const audioElement = document.getElementById("audio");
+          audioElement.srcObject = event.streams[0];
+        };
+        socket.on("answer", async (answer) => {
+          const remoteDesc = new RTCSessionDescription(answer);
+          await peerConnetion.setRemoteDescription(remoteDesc);
+          console.log("接收服务端anser成功");
+        });
+        socket.on("iceCandidate", async (candidate) => {
+          try {
+            await peerConnection.addIceCandidate(
+              new RTCIceCandidate(candidate)
+            );
+            console.log('交换ice成功')
+          } catch (e) {
+            console.error("Error adding received ice candidate", e);
+          }
+        });
+      }
+      async function initRTC() {
+        const offer = peerConnetion.createOffer();
+        await peerConnetion.setLocalDescription(offer);
+        socket.emit("offer", { sdp: peerConnetion.localDescription });
+        console.log("发送offer,等待返回answer");
+      }
+    </script>
+  </body>
+</html>
