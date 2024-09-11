@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -13,55 +13,78 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
     <script>
-      const socket = io("http://localhost:3000", {
+      const socket = io('http://localhost:3000', {
         auth: {
-          user_name: "sdfdfasdfas",
+          user_name: 'sdfdfasdfas',
         },
       });
       let peerConnetion = new RTCPeerConnection({
-        iceServers: [{ urls: "stun:stun.l.google.com:19302" }], // 使用 Google STUN 服务器
+        iceServers: [
+          {
+            urls: [
+              'stun:stun1.l.google.com:19302',
+              'stun:stun3.l.google.com:19302',
+            ],
+          },
+        ], // 使用 Google STUN 服务器
       });
-      socket.on("connectionSuccess", () => {
-        console.log("连接服务器成功");
-        console.log("添加监听事件");
+      // peerConnetion.createDataChannel('test');
+      socket.on('connectionSuccess', () => {
+        console.log('连接服务器成功');
+        console.log('添加监听事件');
         addEvent();
-        console.log("传输信令");
-        initRTC()
+        console.log('传输信令');
+        initRTC();
       });
+      peerConnetion.oniceconnectionstatechange = () => {
+        console.log('ice', peerConnetion.iceConnectionState);
+      };
       function addEvent() {
-        peerConnetion.ontrack = (event)=>{
-          
-        }
-        peerConnetion.onicecandidate = (event) => {
-          if (event.candidate) {
-            socket.emit("iceCandidate", event.candidate);
-          }
-        };
         peerConnetion.ontrack = (event) => {
-          const audioElement = document.getElementById("audio");
+          const audioElement = document.getElementById('audio');
           audioElement.srcObject = event.streams[0];
         };
-        socket.on("answer", async (answer) => {
+        socket.on('answer', async (answer) => {
           const remoteDesc = new RTCSessionDescription(answer);
-          await peerConnetion.setRemoteDescription(remoteDesc);
-          console.log("接收服务端anser成功");
+          peerConnetion
+            .setRemoteDescription(remoteDesc)
+            .then(() => {
+              console.log('接收服务端anser成功');
+            })
+            .catch((error) => {
+              console.log(error);
+            });
         });
-        socket.on("iceCandidate", async (candidate) => {
+        peerConnetion.onicecandidate = (event) => {
+          console.log('传输ice');
+          if (event.candidate) {
+            socket.emit('Candidate', event.candidate); // 发送到服务器
+          }
+        };
+        socket.on('candidate', async (candidate) => {
+          console.log(candidate);
           try {
             await peerConnection.addIceCandidate(
-              new RTCIceCandidate(candidate)
+              new RTCIceCandidate(candidate),
             );
-            console.log('交换ice成功')
+            console.log('交换ice成功');
           } catch (e) {
-            console.error("Error adding received ice candidate", e);
+            console.error('Error adding received ice candidate', e);
           }
         });
       }
+      peerConnetion.onicegatheringstatechange = () => {
+        console.log('ICE gathering state:', peerConnection.iceGatheringState);
+
+        if (peerConnection.iceGatheringState === 'complete') {
+          console.log('All ICE candidates have been gathered.');
+        }
+      };
       async function initRTC() {
         const offer = peerConnetion.createOffer();
         await peerConnetion.setLocalDescription(offer);
-        socket.emit("offer", { sdp: peerConnetion.localDescription });
-        console.log("发送offer,等待返回answer");
+        socket.emit('offer', { sdp: peerConnetion.localDescription });
+        console.log('发送offer,等待返回answer');
       }
     </script>
   </body>

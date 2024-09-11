@@ -29,8 +29,9 @@ export class WebrtcGateway implements OnGatewayConnection {
         client.emit('answer',answer)
       })
   }
-  @SubscribeMessage('iceCandidate')
+  @SubscribeMessage('candidate')
   handleIceCandidate(@MessageBody() candidate: any) {
+    console.log('交换ice');
     this.webrtc.peer.signal(candidate);
   }
 }

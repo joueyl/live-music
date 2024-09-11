@@ -29,6 +29,7 @@ export class WebrtcService {
     this.peer.on('stream', (stream) => {
       // 你可以在这里接收从客户端传来的流
     });
+    
   }
   // pushAudioStream() {
   //     const audioStream = fs.createReadStream('path/to/audio/file.mp3');
