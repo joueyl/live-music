@@ -10,81 +10,62 @@
 
     <audio id="audio" controls autoplay></audio>
     <button id="start">开始播放</button>
-
+    <script src="https://cdn.bootcdn.net/ajax/libs/simple-peer/9.11.1/simplepeer.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
     <script>
-      const socket = io('http://localhost:3000', {
+      const button = document.getElementById("start")
+      button.onclick = ()=>{
+        audio.play()
+      }
+      const audio = document.getElementById('audio')
+      const socket = io('ws://localhost:3000', {
+        reconnection: false,
         auth: {
-          user_name: 'sdfdfasdfas',
+          user_name: '董志斌',
         },
       });
-      let peerConnetion = new RTCPeerConnection({
-        iceServers: [
-          {
-            urls: [
-              'stun:stun1.l.google.com:19302',
-              'stun:stun3.l.google.com:19302',
-            ],
-          },
-        ], // 使用 Google STUN 服务器
+      socket.on('connect', () => {
+        console.log('已连接信令服务器');
       });
-      // peerConnetion.createDataChannel('test');
-      socket.on('connectionSuccess', () => {
-        console.log('连接服务器成功');
-        console.log('添加监听事件');
-        addEvent();
-        console.log('传输信令');
-        initRTC();
+      const peer = new SimplePeer({
+        initiator: true,
+        trickle: true,
       });
-      peerConnetion.oniceconnectionstatechange = () => {
-        console.log('ice', peerConnetion.iceConnectionState);
-      };
-      function addEvent() {
-        peerConnetion.ontrack = (event) => {
-          const audioElement = document.getElementById('audio');
-          audioElement.srcObject = event.streams[0];
-        };
-        socket.on('answer', async (answer) => {
-          const remoteDesc = new RTCSessionDescription(answer);
-          peerConnetion
-            .setRemoteDescription(remoteDesc)
-            .then(() => {
-              console.log('接收服务端anser成功');
-            })
-            .catch((error) => {
-              console.log(error);
-            });
-        });
-        peerConnetion.onicecandidate = (event) => {
-          console.log('传输ice');
-          if (event.candidate) {
-            socket.emit('Candidate', event.candidate); // 发送到服务器
+      peer.on('connect', () => {
+        console.log('WebRTC连接成功');
+      });
+      peer.on('signal', (data) => {
+        if (peer.connected) return;
+        socket.emit('offer', data);
+      });
+      socket.on('answer', (data) => {
+        peer.signal(data);
+      });
+      let audioChunks = [];
+      peer.on('data', (chunk) => {
+        // 检查是否是完成标志
+        console.log(typeof chunk)
+        if (typeof chunk === 'string') {
+          const message = JSON.parse(chunk);
+          if (message.done) {
+            console.log('Audio transfer completed');
+            playAudio(audioChunks); // 当音频接收完成后，播放音频
+            return;
           }
-        };
-        socket.on('candidate', async (candidate) => {
-          console.log(candidate);
-          try {
-            await peerConnection.addIceCandidate(
-              new RTCIceCandidate(candidate),
-            );
-            console.log('交换ice成功');
-          } catch (e) {
-            console.error('Error adding received ice candidate', e);
-          }
-        });
-      }
-      peerConnetion.onicegatheringstatechange = () => {
-        console.log('ICE gathering state:', peerConnection.iceGatheringState);
-
-        if (peerConnection.iceGatheringState === 'complete') {
-          console.log('All ICE candidates have been gathered.');
         }
-      };
-      async function initRTC() {
-        const offer = peerConnetion.createOffer();
-        await peerConnetion.setLocalDescription(offer);
-        socket.emit('offer', { sdp: peerConnetion.localDescription });
-        console.log('发送offer,等待返回answer');
+
+        // 将二进制数据块存储到数组中
+        audioChunks.push(chunk);
+      });
+      peer.on("end",()=>{
+        playAudio(audioChunks)
+      })
+      // 通过 Audio API 播放接收到的音频数据
+      function playAudio(chunks) {
+        const blob = new Blob(chunks, { type: 'audio/mp3' });
+        const url = URL.createObjectURL(blob);
+        console.log(url)
+        audio.src = url
       }
     </script>
   </body>
