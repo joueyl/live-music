@@ -52,30 +52,32 @@
       });
       let audioChunks = [];
       const mediaSource = new MediaSource();
-      console.log(MediaSource.isTypeSupported('audio/webm; codecs="opus"'))
+      console.log(MediaSource.isTypeSupported('audio/webm; codecs="opus"'));
       audio.src = URL.createObjectURL(mediaSource);
       let sourceBuffer;
       mediaSource.addEventListener('sourceopen', () => {
         sourceBuffer = mediaSource.addSourceBuffer('audio/webm; codecs="opus"');
+        peer.on('data', (chunk) => {
+          console.log(sourceBuffer);
+          if (!sourceBuffer.updating) {
+            console.log(chunk);
+            sourceBuffer.appendBuffer(chunk);
+          } else {
+            // 等待 sourceBuffer 完成更新后再追加数据
+            sourceBuffer.addEventListener(
+              'updateend',
+              () => {
+                sourceBuffer.appendBuffer(chunk);
+              },
+              { once: true },
+            );
+          }
+        });
       });
-      mediaSource.addEventListener('error',(error)=>{
-        console.log(error)
-      })
-      peer.on('data', (chunk) => {
-        if (!sourceBuffer.updating) {
-          console.log(chunk)
-          sourceBuffer.appendBuffer(chunk);
-        } else {
-          // 等待 sourceBuffer 完成更新后再追加数据
-          sourceBuffer.addEventListener(
-            'updateend',
-            () => {
-              sourceBuffer.appendBuffer(chunk);
-            },
-            { once: true },
-          );
-        }
+      mediaSource.addEventListener('error', (error) => {
+        console.log(error);
       });
+
       peer.on('end', () => {
         playAudio(audioChunks);
       });
