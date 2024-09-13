@@ -51,30 +51,37 @@
         peer.signal(data);
       });
       let audioChunks = [];
+      const mediaSource = new MediaSource();
+      console.log(MediaSource.isTypeSupported('audio/webm; codecs="opus"'))
+      audio.src = URL.createObjectURL(mediaSource);
+      let sourceBuffer;
+      mediaSource.addEventListener('sourceopen', () => {
+        sourceBuffer = mediaSource.addSourceBuffer('audio/webm; codecs="opus"');
+      });
+      mediaSource.addEventListener('error',(error)=>{
+        console.log(error)
+      })
       peer.on('data', (chunk) => {
-        // 检查是否是完成标志
-        console.log(typeof chunk);
-        if (typeof chunk === 'string') {
-          const message = JSON.parse(chunk);
-          if (message.done) {
-            console.log('Audio transfer completed');
-            playAudio(audioChunks); // 当音频接收完成后，播放音频
-            return;
-          }
+        if (!sourceBuffer.updating) {
+          console.log(chunk)
+          sourceBuffer.appendBuffer(chunk);
+        } else {
+          // 等待 sourceBuffer 完成更新后再追加数据
+          sourceBuffer.addEventListener(
+            'updateend',
+            () => {
+              sourceBuffer.appendBuffer(chunk);
+            },
+            { once: true },
+          );
         }
-
-        // 将二进制数据块存储到数组中
-        audioChunks.push(chunk);
       });
       peer.on('end', () => {
         playAudio(audioChunks);
       });
       // 通过 Audio API 播放接收到的音频数据
       function playAudio(chunks) {
-        const blob = new Blob(chunks, { type: 'audio/mp3' });
-        const url = URL.createObjectURL(blob);
-        console.log(url);
-        audio.src = url;
+        console.log(chunks);
       }
     </script>
   </body>

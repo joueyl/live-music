@@ -2,13 +2,9 @@
 ```cmd
 pnpm run start:dev
 ```
-# 单独启动WebRTC后端(无数据库)
+# 单独启动WebRTC后端(无需数据库附带测试前端)
 ```cmd
 pnpm run webrtc
-```
-# 启动测试前端
-```cmd
-pnpm run client
 ```
 # MusicLive
 

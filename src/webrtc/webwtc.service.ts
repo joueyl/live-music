@@ -1,35 +1,50 @@
 import { Injectable } from '@nestjs/common';
 import * as Peer from 'simple-peer';
-import {createReadStream} from 'node:fs';
-import ffmpeg from 'fluent-ffmpeg';
+import { createReadStream } from 'node:fs';
+import * as ffmpeg from 'fluent-ffmpeg';
 import * as wrtc from 'wrtc';
-import { Readable } from 'node:stream';
+import * as mm from 'music-metadata'
 import { resolve } from 'node:path';
 @Injectable()
 export class WebrtcService {
   peer: Peer.Instance;
   constructor() {
-   this.createPeer()
-    
+    this.createPeer();
   }
-  createPeer(){
+  createPeer() {
     this.peer = this.peer = new Peer({
-      initiator:false,
-      trickle:true,
-      wrtc:wrtc as any
-    })
-    
+      initiator: false,
+      trickle: true,
+      wrtc: wrtc as any,
+    });
   }
-  pushAudioStream() {
-      const music = resolve(__dirname,'../../music/We Can’t Stop-Miley Cyrus.128.mp3')
-      const audioStream = createReadStream(music);
-      audioStream.on('data',(chunk)=>{
-        this.peer.send(chunk)
+  async pushAudioStream() {
+    const music = resolve(
+      __dirname,
+      '../../music/We Can’t Stop-Miley Cyrus.128.mp3',
+    );
+    ffmpeg.setFfmpegPath('F:\\ffmpeg\\bin\\ffmpeg.exe')
+   const ffmpegProcess =  ffmpeg(music)
+      .inputOption('-re')
+      .audioCodec('libopus')
+      .format('webm')
+      .on('start', () => {
+        console.log('开始播放');
+      }).on('end',()=>{
+        console.log('播放结束');
+      }).on('error',(err)=>{
+        console.log(err);
       })
-      audioStream.on('end', () => {
-        console.log('File transfer complete');
-        this.peer.emit('end')
-      });
-      // this.peer.addTrack(ffmpegStream);
-    }
+    ffmpegProcess.pipe().on('data',(data)=>{
+      this.peer.write(data)
+    })
+    // audioStream.on('data', (chunk) => {
+    //   this.peer.send(chunk);
+    // });
+    // audioStream.on('end', () => {
+    //   console.log('File transfer complete');
+    //   this.peer.emit('end');
+    // });
+    // this.peer.addTrack(ffmpegStream);
+  }
 }
