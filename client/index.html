@@ -13,15 +13,15 @@
     <script src="https://cdn.bootcdn.net/ajax/libs/simple-peer/9.11.1/simplepeer.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
     <script>
-      const button = document.getElementById("start")
-      button.onclick = ()=>{
-        audio.play()
-      }
-      const audio = document.getElementById('audio')
+      const button = document.getElementById('start');
+      button.onclick = () => {
+        audio.play();
+      };
+      const audio = document.getElementById('audio');
       const socket = io('ws://localhost:3000', {
         reconnection: false,
         auth: {
-          user_name: '董志斌',
+          user_name: '测试用户',
         },
       });
       socket.on('connect', () => {
@@ -30,6 +30,15 @@
       const peer = new SimplePeer({
         initiator: true,
         trickle: true,
+        config: {
+          iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' }, // 使用 Google 的 STUN 服务器
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' },
+            { urls: 'stun:stun3.l.google.com:19302' },
+            { urls: 'stun:stun4.l.google.com:19302' },
+          ],
+        },
       });
       peer.on('connect', () => {
         console.log('WebRTC连接成功');
@@ -44,7 +53,7 @@
       let audioChunks = [];
       peer.on('data', (chunk) => {
         // 检查是否是完成标志
-        console.log(typeof chunk)
+        console.log(typeof chunk);
         if (typeof chunk === 'string') {
           const message = JSON.parse(chunk);
           if (message.done) {
@@ -57,15 +66,15 @@
         // 将二进制数据块存储到数组中
         audioChunks.push(chunk);
       });
-      peer.on("end",()=>{
-        playAudio(audioChunks)
-      })
+      peer.on('end', () => {
+        playAudio(audioChunks);
+      });
       // 通过 Audio API 播放接收到的音频数据
       function playAudio(chunks) {
         const blob = new Blob(chunks, { type: 'audio/mp3' });
         const url = URL.createObjectURL(blob);
-        console.log(url)
-        audio.src = url
+        console.log(url);
+        audio.src = url;
       }
     </script>
   </body>

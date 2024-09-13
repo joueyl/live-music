@@ -1,24 +1,15 @@
----
-title: MusicLive v1.0.0
-language_tabs:
-  - shell: Shell
-  - http: HTTP
-  - javascript: JavaScript
-  - ruby: Ruby
-  - python: Python
-  - php: PHP
-  - java: Java
-  - go: Go
-toc_footers: []
-includes: []
-search: true
-code_clipboard: true
-highlight_theme: darkula
-headingLevel: 2
-generator: "@tarslib/widdershins v4.0.17"
-
----
-
+# 完整启动后端
+```cmd
+pnpm run start:dev
+```
+# 单独启动WebRTC后端(无数据库)
+```cmd
+pnpm run webrtc
+```
+# 启动测试前端
+```cmd
+pnpm run client
+```
 # MusicLive
 
 > v1.0.0

@@ -4,6 +4,7 @@ import {createReadStream} from 'node:fs';
 import ffmpeg from 'fluent-ffmpeg';
 import * as wrtc from 'wrtc';
 import { Readable } from 'node:stream';
+import { resolve } from 'node:path';
 @Injectable()
 export class WebrtcService {
   peer: Peer.Instance;
@@ -20,7 +21,8 @@ export class WebrtcService {
     
   }
   pushAudioStream() {
-      const audioStream = createReadStream('F:/tmp/We Can’t Stop-Miley Cyrus.128.mp3');
+      const music = resolve(__dirname,'../../music/We Can’t Stop-Miley Cyrus.128.mp3')
+      const audioStream = createReadStream(music);
       audioStream.on('data',(chunk)=>{
         this.peer.send(chunk)
       })
