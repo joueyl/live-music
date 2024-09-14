@@ -16,6 +16,7 @@ import { SessionService } from './Session.service';
         return {
           uri: `mongodb://${configService.get('DATABASE_HOST')}:${configService.get('DATABASE_PORT')}`,
           user: configService.get('DATABASE_USER_NAME'),
+          authSource:configService.get('DATABASE_NAME'),
           dbName: configService.get('DATABASE_NAME'),
           pass: configService.get('DATABASE_PASSWORD'),
         };

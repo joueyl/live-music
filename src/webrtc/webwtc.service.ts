@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as Peer from 'simple-peer';
 import { createReadStream } from 'node:fs';
 import * as ffmpeg from 'fluent-ffmpeg';
-import * as wrtc from 'wrtc';
+import * as wrtc from '@koush/wrtc';
 import { platform } from 'node:os';
 import { resolve } from 'node:path';
 @Injectable()
@@ -29,7 +29,7 @@ export class WebrtcService {
     );
     if (platform() == 'darwin')
       ffmpegPath = resolve(__dirname, `../../ffmpeg/ffmpeg`);
-    ffmpeg.setFfmpegPath('F:\\ffmpeg\\bin\\ffmpeg.exe');
+    ffmpeg.setFfmpegPath(ffmpegPath);
     const ffmpegProcess = ffmpeg(music)
       .inputOption('-re')
       .audioCodec('libopus')
