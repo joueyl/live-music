@@ -23,7 +23,6 @@ export class WebrtcService {
       __dirname,
       '../../music/We Can’t Stop-Miley Cyrus.128.mp3',
     );
-    const platforms = platform();
     let ffmpegPath = resolve(
       __dirname,
       `../../ffmpeg/${platform()}/bin/ffmpeg`,

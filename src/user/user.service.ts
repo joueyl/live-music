@@ -4,7 +4,8 @@ import { MailService } from 'src/mail/mail.service';
 import { UserService as UserDB } from '../mongodb/User.service';
 import { CodeServeice as CodeDB } from 'src/mongodb/Code.service';
 import { JwtService } from '@nestjs/jwt';
-import { hash, compare } from 'bcrypt';
+// import { hash, compare } from 'bcrypt';
+import {hash,compare} from 'bcryptjs'
 import { ConfigService } from '@nestjs/config';
 import {Request} from 'express'
 import {SessionService} from '../mongodb/Session.service'
