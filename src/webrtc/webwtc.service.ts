@@ -3,7 +3,7 @@ import * as Peer from 'simple-peer';
 import { createReadStream } from 'node:fs';
 import * as ffmpeg from 'fluent-ffmpeg';
 import * as wrtc from 'wrtc';
-import {platform} from 'node:os'
+import { platform } from 'node:os';
 import { resolve } from 'node:path';
 @Injectable()
 export class WebrtcService {
@@ -23,28 +23,30 @@ export class WebrtcService {
       __dirname,
       '../../music/We Can’t Stop-Miley Cyrus.128.mp3',
     );
-    const platforms = platform()
-    if(platforms =='win32'){
-      const ffmpegPath = resolve(__dirname,'../../ffmpeg/win32/bin/ffmpeg.exe')
-      const ffprobePath = resolve(__dirname,"../../ffmpeg/win32/bin/ffprobe.exe")
-      ffmpeg.setFfmpegPath(ffmpegPath)
-      ffmpeg.setFfprobePath(ffprobePath)
-    }
-    ffmpeg.setFfmpegPath('F:\\ffmpeg\\bin\\ffmpeg.exe')
-   const ffmpegProcess =  ffmpeg(music)
+    const platforms = platform();
+    let ffmpegPath = resolve(
+      __dirname,
+      `../../ffmpeg/${platform()}/bin/ffmpeg`,
+    );
+    if (platform() == 'darwin')
+      ffmpegPath = resolve(__dirname, `../../ffmpeg/ffmpeg`);
+    ffmpeg.setFfmpegPath('F:\\ffmpeg\\bin\\ffmpeg.exe');
+    const ffmpegProcess = ffmpeg(music)
       .inputOption('-re')
       .audioCodec('libopus')
       .format('webm')
       .on('start', () => {
         console.log('开始播放');
-      }).on('end',()=>{
-        console.log('播放结束');
-      }).on('error',(err)=>{
-        console.log(err);
       })
-    ffmpegProcess.pipe().on('data',(data)=>{
-      this.peer.write(data)
-    })
+      .on('end', () => {
+        console.log('播放结束');
+      })
+      .on('error', (err) => {
+        console.log(err);
+      });
+    ffmpegProcess.pipe().on('data', (data) => {
+      this.peer.write(data);
+    });
     // audioStream.on('data', (chunk) => {
     //   this.peer.send(chunk);
     // });
