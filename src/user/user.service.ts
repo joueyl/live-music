@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { LoginParams, RegisterPrams } from './dto/create-user.dto';
 import { MailService } from 'src/mail/mail.service';
 import { UserService as UserDB } from '../mongodb/User.service';
@@ -41,6 +41,7 @@ export class UserService {
     return null;
   }
   async login(body:LoginParams,req:Request){
+    // throw new HttpException("error",HttpStatus.FOUND)
     const isExist =await this.userdb.login(body)
     if(!isExist) throw new BadRequestException('未注册')
     const isVerify =await compare(body.pass_word,isExist.pass_word)

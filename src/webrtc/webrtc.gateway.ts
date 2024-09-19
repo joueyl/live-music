@@ -19,6 +19,7 @@ export class WebrtcGateway implements OnGatewayConnection,OnGatewayDisconnect {
   handleConnection(client: Socket) {
     console.clear()
     console.log(`用户:${client.handshake.auth.user_name} 已连接信令服务器`);
+    
     if(this.webrtc.peer.destroyed){
       this.webrtc.peer.destroy()
       this.webrtc.createPeer()

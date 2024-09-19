@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { WebrtcGateway } from './webrtc/webrtc.gateway';
 import { WebrtcService } from './webrtc/webwtc.service';
 import {MinioService} from './webrtc/minio.service'
+import { RoomModule } from './room/room.module';
 
 @Module({
   imports: [
@@ -11,7 +12,8 @@ import {MinioService} from './webrtc/minio.service'
       isGlobal: true,
       envFilePath: '.env',
     }),
-    UserModule
+    UserModule,
+    RoomModule
   ],
   providers: [WebrtcGateway,MinioService,WebrtcService]
 })

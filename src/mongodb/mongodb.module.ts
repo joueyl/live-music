@@ -7,6 +7,8 @@ import { codeSchema } from './schema/code.shema';
 import { CodeServeice } from './Code.service';
 import {sessionShema} from './schema/session.shema'
 import { SessionService } from './Session.service';
+import {RoomSchema} from './schema/room.shema'
+import {RoomService} from './Room.service'
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -24,10 +26,11 @@ import { SessionService } from './Session.service';
     MongooseModule.forFeature([
       { name: 'User', schema: userSchema },
       { name: 'Code', schema: codeSchema },
-      {name:"Session",schema:sessionShema}
+      {name:"Session",schema:sessionShema},
+      {name:'room',schema:RoomSchema}
     ]),
   ],
-  providers: [UserService, CodeServeice,SessionService],
-  exports: [UserService, CodeServeice,SessionService],
+  providers: [UserService, CodeServeice,SessionService,RoomService],
+  exports: [UserService, CodeServeice,SessionService,RoomService],
 })
 export class MongodbModule {}
