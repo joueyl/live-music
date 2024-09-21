@@ -13,4 +13,7 @@ export class RoomService {
   async getRooms(){
     return this.room.find()
   }
+  async findRooms(room:Partial<AddRoomParams>){
+    return this.room.find(room)
+  }
 }

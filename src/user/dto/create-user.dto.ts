@@ -40,3 +40,11 @@ export class LoginParams{
     @IsString()
     pass_word:string
 }
+
+export class User{
+    @IsString()
+    user_name:string
+
+    @IsString()
+    _id:string
+}

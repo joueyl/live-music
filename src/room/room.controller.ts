@@ -24,4 +24,9 @@ export class RoomController {
   async getRooms(){
     return this.roomService.getRooms()
   }
+  @Post('exist')
+  @UseInterceptors(AnyFilesInterceptor())
+  async roomExist(@ValidataBody(AddRoomParams) room:AddRoomParams){
+    return this.roomService.roomExist(room)
+  }
 }

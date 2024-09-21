@@ -10,7 +10,7 @@
 
     <audio id="audio" controls autoplay></audio>
     <button id="start">开始播放</button>
-    <script src="https://cdn.bootcdn.net/ajax/libs/simple-peer/9.11.1/simplepeer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
     <script>
       const button = document.getElementById('start');
@@ -20,71 +20,21 @@
       const audio = document.getElementById('audio');
       const socket = io('ws://localhost:3000', {
         reconnection: false,
+        query: { token: '123' },
         auth: {
-          user_name: '测试用户',
+          user: {
+            user_name: '测试用户2',
+            user_id: '4567asdf',
+          },
+          room: {
+            _id: '66ea920ba9d73f08a839059e',
+            name: '大厅',
+            token:
+              'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjEwNTI1MDgxMzhAcXEuY29tIiwiaWF0IjoxNzI2ODAxNzY5LCJleHAiOjE3MjkzOTM3Njl9.V6Zt6-30_U6CFds2FQinF-41YSMm_Qhik3dw3MWjN_w',
+          },
         },
       });
-      socket.on('connect', () => {
-        console.log('已连接信令服务器');
-      });
-      const peer = new SimplePeer({
-        initiator: true,
-        trickle: true,
-        config: {
-          iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' }, // 使用 Google 的 STUN 服务器
-            { urls: 'stun:stun1.l.google.com:19302' },
-            { urls: 'stun:stun2.l.google.com:19302' },
-            { urls: 'stun:stun3.l.google.com:19302' },
-            { urls: 'stun:stun4.l.google.com:19302' },
-          ],
-        },
-      });
-      peer.on('connect', () => {
-        console.log('WebRTC连接成功');
-      });
-      peer.on('signal', (data) => {
-        if (peer.connected) return;
-        socket.emit('offer', data);
-      });
-      socket.on('answer', (data) => {
-        peer.signal(data);
-      });
-      let audioChunks = [];
-      const mediaSource = new MediaSource();
-      console.log(MediaSource.isTypeSupported('audio/webm; codecs="opus"'));
-      audio.src = URL.createObjectURL(mediaSource);
-      let sourceBuffer;
-      mediaSource.addEventListener('sourceopen', () => {
-        sourceBuffer = mediaSource.addSourceBuffer('audio/webm; codecs="opus"');
-        peer.on('data', (chunk) => {
-          console.log(sourceBuffer);
-          if (!sourceBuffer.updating) {
-            console.log(chunk);
-            sourceBuffer.appendBuffer(chunk);
-          } else {
-            // 等待 sourceBuffer 完成更新后再追加数据
-            sourceBuffer.addEventListener(
-              'updateend',
-              () => {
-                sourceBuffer.appendBuffer(chunk);
-              },
-              { once: true },
-            );
-          }
-        });
-      });
-      mediaSource.addEventListener('error', (error) => {
-        console.log(error);
-      });
-
-      peer.on('end', () => {
-        playAudio(audioChunks);
-      });
-      // 通过 Audio API 播放接收到的音频数据
-      function playAudio(chunks) {
-        console.log(chunks);
-      }
+      
     </script>
   </body>
 </html>

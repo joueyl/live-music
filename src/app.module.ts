@@ -1,11 +1,8 @@
-import { Module,Controller, Get, Render } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
-import { WebrtcGateway } from './webrtc/webrtc.gateway';
-import { WebrtcService } from './webrtc/webwtc.service';
-import {MinioService} from './webrtc/minio.service'
 import { RoomModule } from './room/room.module';
-
+import {SocketModule} from './socket/socket.module'
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -13,8 +10,9 @@ import { RoomModule } from './room/room.module';
       envFilePath: '.env',
     }),
     UserModule,
-    RoomModule
+    RoomModule,
+    SocketModule
   ],
-  providers: [WebrtcGateway,MinioService,WebrtcService]
+  providers: []
 })
 export class AppModule {}

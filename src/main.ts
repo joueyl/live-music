@@ -3,7 +3,6 @@ import {NestExpressApplication} from '@nestjs/platform-express'
 import { AppModule } from './app.module';
 import {FormTransform} from './interceptors/formTransform'
 import {ErrFilter} from './interceptors/errFilter'
-import { join } from 'node:path';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.enableCors()
