@@ -14,6 +14,6 @@ export class RoomService {
     return this.room.find()
   }
   async findRooms(room:Partial<AddRoomParams>){
-    return this.room.find(room)
+    return this.room.find({_id:room._id,name:room.name})
   }
 }

@@ -10,31 +10,6 @@
 
     <audio id="audio" controls autoplay></audio>
     <button id="start">开始播放</button>
-    <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
-    <script>
-      const button = document.getElementById('start');
-      button.onclick = () => {
-        audio.play();
-      };
-      const audio = document.getElementById('audio');
-      const socket = io('ws://localhost:3000', {
-        reconnection: false,
-        query: { token: '123' },
-        auth: {
-          user: {
-            user_name: '测试用户2',
-            user_id: '4567asdf',
-          },
-          room: {
-            _id: '66ea920ba9d73f08a839059e',
-            name: '大厅',
-            token:
-              'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjEwNTI1MDgxMzhAcXEuY29tIiwiaWF0IjoxNzI2ODAxNzY5LCJleHAiOjE3MjkzOTM3Njl9.V6Zt6-30_U6CFds2FQinF-41YSMm_Qhik3dw3MWjN_w',
-          },
-        },
-      });
-      
-    </script>
+    <script src="./js/index.global.js"></script>
   </body>
 </html>
