@@ -41,7 +41,12 @@ export class WebrtcGateway
     });
   }
   async handleConnection(client: Socket, ...args: any[]) {
-    await this.medias.createRoom(client.handshake.auth.room);
+    try {
+      await this.medias.createRoom(client.handshake.auth.room);
+    } catch (error) {
+      client.emit('error',{message:'房间不存在'})
+      client.disconnect()
+    }
     const room = this.medias.getRouter(client.handshake.auth.room._id);
     client.emit('CreateRoomed');
   }
@@ -54,17 +59,22 @@ export class WebrtcGateway
   @SubscribeMessage('getConsume')
   async getConsume(client: Socket) {
    const {params,transport} =await this.medias.createConsumerTransport(client.handshake.auth.room._id);
-   
+   transport.on('icestatechange',(state)=>{
+    if(state=='disconnected') transport.close()
+   })
    return params
   }
   @SubscribeMessage('connectConsumerTransport')
-  consumeConnect(client:Socket,param:any){
+  async consumeConnect(client:Socket,param:any){
     const room = this.medias.getRouter(client.handshake.auth.room._id);
-    room.transparots[0].connect({dtlsParameters:param.dtlsParameters})
-    return null
+    console.log(room.transparots.length);
+    await room.transparots[room.transparots.length - 1].connect({dtlsParameters:param.dtlsParameters})
+    return {message:'成功'}
   }
-  @SubscribeMessage('getStream')
-  getStream(){
+  @SubscribeMessage('consume')
+  async getStream(client:Socket,{rtpCapabilities}:any){
+    const room = this.medias.getRouter(client.handshake.auth.room._id)
+   return await this.medias.createProducer(room,rtpCapabilities)
     
   }
 }

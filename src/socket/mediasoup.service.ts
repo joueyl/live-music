@@ -7,20 +7,18 @@ import {
   PlainTransport,
   Producer,
   Router,
+  RtpCapabilities,
   WebRtcTransport,
 } from 'mediasoup/node/lib/types';
-import * as ffmpeg from 'fluent-ffmpeg';
 import { resolve } from 'path';
+interface IRoom {
+  router: Router<AppData>;
+  transparots: WebRtcTransport<AppData>[];
+  producer: null | Producer<AppData>;
+}
 @Injectable()
 export class Mediasoup {
-  rooms = new Map<
-    string,
-    {
-      router: Router<AppData>;
-      transparots: WebRtcTransport<AppData>[];
-      producer: null | PlainTransport<AppData>;
-    }
-  >();
+  rooms = new Map<string, IRoom>();
   worker = createWorker({
     logLevel: 'warn',
     rtcMinPort: 40000,
@@ -44,6 +42,7 @@ export class Mediasoup {
         ],
       });
       this.rooms.set(room._id, { router, transparots: [], producer: null });
+      await this.startVideoStream(room._id);
       return router;
     }
   }
@@ -55,48 +54,49 @@ export class Mediasoup {
     const room = this.getRouter(roomId);
     if (!room) new Error('房间未创建');
     const transport = await room.router.createPlainTransport({
-      listenIp: '127.0.0.1',
+      listenInfo: { protocol: 'udp', ip: '127.0.0.1',port:5004 },
       rtcpMux: true,
-      comedia: false,
+      comedia: true
     });
-    const path = resolve(
-      __dirname,
-      '../../music/We Can’t Stop-Miley Cyrus.128.mp3',
-    );
-    const command = ffmpeg(path)
-      .inputOptions('-re')
-      .audioCodec('libopus')
-      .outputOptions('-f', 'rtp')
-      .output(`rtp://127.0.0.1:${transport.tuple.localPort}`)
-      .run();
-    const producer = await transport.produce({
-      kind: 'audio',
-      rtpParameters: {
-        codecs: [
-          {
-            mimeType: 'audio/opus',
-            payloadType: 100,
-            clockRate: 48000,
-            channels: 2,
-          },
-        ],
-        encodings: [{ ssrc: Date.now() }],
-        mid: 'audio',
-      },
+    
+    return new Promise(async (resolve) => {
+      console.log(`请推流至rtp://127.0.0.1:${transport.tuple.localPort}\nssrc:123456789`);
+      const producer = await transport.produce({
+        kind: 'audio',
+        rtpParameters: {
+          codecs: [
+            {
+              mimeType: 'audio/opus',
+              payloadType: 97,
+              clockRate: 48000,
+              channels: 2,
+            },
+          ],
+          encodings: [{ ssrc: 12345678 }],
+        },
+      });
+      room.producer = producer;
+      transport.on('tuple',(state)=>{
+        console.log(state);
+      })
+      
+      resolve(producer);
     });
-
-    room.producer = transport;
   }
   async createConsumerTransport(roomId: string) {
     const room = this.getRouter(roomId);
     if (!room) throw new Error('房间不存在');
     const transport = await room.router.createWebRtcTransport({
-      listenIps: [{ ip: '0.0.0.0', announcedIp: null }],
+      listenIps: [{ ip: '127.0.0.1', announcedIp: null }],
+      enableSctp: true,
       enableUdp: true,
       enableTcp: true,
       preferUdp: true,
+      maxSctpMessageSize: 262144,
     });
-    
+    transport.on('@close',()=>{
+      console.log('已关闭');
+    })
     room.transparots.push(transport);
     return {
       transport,
@@ -108,12 +108,24 @@ export class Mediasoup {
       },
     };
   }
-  async createProducerTransport(roomId: string) {
-    const room = this.getRouter(roomId);
-    room.producer = await room.router.createPlainTransport({
-      listenIp: { ip: '0.0.0.0', announcedIp: null },
-      rtcpMux: true,
-      comedia: false,
-    });
+  async createProducer(room: IRoom, rtpCapabilities: RtpCapabilities) {
+    try {
+      const consumer = await room.transparots[room.transparots.length -1].consume({
+        producerId: room.producer.id,
+        rtpCapabilities,
+        // paused: room.producer.kind == 'audio',
+      });
+      consumer.resume();
+      return {
+        producerId: room.producer.id,
+        id: consumer.id,
+        kind: consumer.kind,
+        rtpParameters: consumer.rtpParameters,
+        type: consumer.type,
+        producerPaused: consumer.producerPaused,
+      };
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

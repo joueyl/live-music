@@ -21508,19 +21508,17 @@
       this.socket = lookup2("/", {
         auth: {
           room: params.room
-        }
+        },
+        reconnection: false
       });
       this.socket.on("CreateRoomed", async () => {
         this.getRtp(params.getRtpName || "getRouterRtpCapabilities");
         const consume = await this.getConsume(params.getConsumeName || "getConsume");
-        consume.on("connect", () => {
-          console.log("connect");
-        });
       });
     }
     getConsume(eventName) {
       return new Promise((resolve, reject) => {
-        this.socket.emit(eventName, (data) => {
+        this.socket.emit(eventName, async (data) => {
           const transport = this.device.createRecvTransport(data);
           this.transport = transport;
           transport.on("connect", ({ dtlsParameters }, callback, errback) => {
@@ -21528,15 +21526,28 @@
               transportId: transport.id,
               dtlsParameters
             }, () => {
-              callback();
               this.EmitEvnet("Finish");
+              callback();
               resolve(transport);
             });
           });
+          const { stream, consumer } = await this.getStream(transport);
+          const audio = document.querySelector("#audio");
           transport.on("connectionstatechange", (state) => {
-            console.log(state);
+            if (state == "connected" && consumer.track.readyState == "live") {
+              consumer.getStats().then((stats) => {
+                stats.forEach((report) => {
+                  console.log(report);
+                  if (report.type === "inbound-rtp" && report.kind === "audio") {
+                    console.log("Audio bytes received:", report.bytesReceived);
+                    console.log("Packets lost:", report.packetsLost);
+                  }
+                });
+              });
+              audio.srcObject = stream;
+              audio.play();
+            }
           });
-          this.getStream();
         });
       });
     }
@@ -21559,11 +21570,27 @@
         fnArr.forEach((item) => item(arg));
       }
     }
-    getStream() {
+    getStream(transport) {
       const { rtpCapabilities } = this.device;
-      this.socket.emit("consume", {
-        rtpCapabilities
-      }, () => {
+      return new Promise((resolve, reject) => {
+        this.socket.emit("consume", {
+          rtpCapabilities
+        }, async (data) => {
+          const { producerId, id, kind, rtpParameters } = data;
+          const consumer = await transport.consume({
+            producerId,
+            id,
+            kind,
+            rtpParameters
+          });
+          const stream = new MediaStream();
+          stream.addTrack(consumer.track);
+          console.log(stream.getAudioTracks());
+          resolve({
+            stream,
+            consumer
+          });
+        });
       });
     }
   };
@@ -21571,16 +21598,19 @@
   var Mediasoup = _Mediasoup;
 
   // client/index.ts
-  var med = new Mediasoup({
-    room: {
-      name: "\u5927\u5385",
-      _id: "66ea920ba9d73f08a839059e",
-      token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjEwNTI1MDgxMzhAcXEuY29tIiwiaWF0IjoxNzI2ODAxNzY5LCJleHAiOjE3MjkzOTM3Njl9.V6Zt6-30_U6CFds2FQinF-41YSMm_Qhik3dw3MWjN_w"
-    }
-  });
-  med.on("Finish", () => {
-    console.log("\u6240\u6709\u8FDE\u63A5\u5B8C\u6210");
-  });
+  var button = document.querySelector("#start");
+  button.onclick = () => {
+    const med = new Mediasoup({
+      room: {
+        name: "\u5927\u5385",
+        _id: "66fd364cd6b5d5833c0cc50b",
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjEwNTI1MDgxMzhAcXEuY29tIiwiaWF0IjoxNzI2ODAxNzY5LCJleHAiOjE3MjkzOTM3Njl9.V6Zt6-30_U6CFds2FQinF-41YSMm_Qhik3dw3MWjN_w"
+      }
+    });
+    med.on("Finish", () => {
+      console.log("\u6240\u6709\u8FDE\u63A5\u5B8C\u6210");
+    });
+  };
 })();
 /*! Bundled license information:
 

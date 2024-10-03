@@ -1,7 +1,7 @@
 import { Device } from 'mediasoup-client';
 import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
 import { Transport } from 'mediasoup-client/lib/Transport';
-import { AppData } from 'mediasoup-client/lib/types';
+import { AppData, Consumer } from 'mediasoup-client/lib/types';
 import { io, Socket } from 'socket.io-client';
 type Event = 'Error' | 'Connect' | 'GetRtp' | 'Finish';
 interface InitParams {
@@ -26,35 +26,52 @@ export class Mediasoup {
     }
   }
   private initSocket(params: InitParams) {
-    this.socket = io('/', { auth: { room: params.room } });
-    this.socket.on('CreateRoomed',async () => {
+    this.socket = io('/', { auth: { room: params.room }, reconnection: false });
+    this.socket.on('CreateRoomed', async () => {
       this.getRtp(params.getRtpName || 'getRouterRtpCapabilities');
-     const consume = await this.getConsume(params.getConsumeName || 'getConsume');
-     consume.on('connect',()=>{
-        console.log('connect');
-     })
+      const consume = await this.getConsume(
+        params.getConsumeName || 'getConsume',
+      );
     });
   }
   private getConsume(eventName: string) {
     return new Promise<Transport<AppData>>((resolve, reject) => {
-      this.socket.emit(eventName, (data) => {
+      this.socket.emit(eventName, async (data) => {
         const transport = this.device.createRecvTransport(data);
+
         this.transport = transport;
-        transport.on('connect',({ dtlsParameters }, callback, errback)=>{
-            this.socket.emit('connectConsumerTransport',{
-                transportId:transport.id,
-                dtlsParameters
-            },()=>{
-                callback()
-                this.EmitEvnet('Finish')
-                resolve(transport)
-            })
-        })
-        transport.on('connectionstatechange',(state)=>{
-            console.log(state);
-        })
-        this.getStream()
-    });
+        transport.on('connect', ({ dtlsParameters }, callback, errback) => {
+          this.socket.emit(
+            'connectConsumerTransport',
+            {
+              transportId: transport.id,
+              dtlsParameters,
+            },
+            () => {
+              this.EmitEvnet('Finish');
+              callback();
+              resolve(transport);
+            },
+          );
+        });
+        const { stream, consumer } = await this.getStream(transport);
+        const audio = document.querySelector('#audio') as HTMLAudioElement;
+        transport.on('connectionstatechange', (state) => {
+          if (state == 'connected'&&consumer.track.readyState=='live') {
+            consumer.getStats().then((stats) => {
+              stats.forEach((report) => {
+                console.log(report);
+                if (report.type === 'inbound-rtp' && report.kind === 'audio') {
+                  console.log('Audio bytes received:', report.bytesReceived);
+                  console.log('Packets lost:', report.packetsLost);
+                }
+              });
+            });
+            audio.srcObject = stream;
+            audio.play();
+          }
+        });
+      });
     });
   }
   private getRtp(eventName: string) {
@@ -77,12 +94,30 @@ export class Mediasoup {
       fnArr.forEach((item) => item(arg));
     }
   }
-  getStream() {
-    const {rtpCapabilities} = this.device
-    this.socket.emit('consume',{
-        rtpCapabilities
-    },()=>{
-        
-    })
+  getStream(transport: Transport<AppData>) {
+    const { rtpCapabilities } = this.device;
+    return new Promise<{ stream: MediaStream; consumer: Consumer<AppData> }>(
+      (resolve, reject) => {
+        this.socket.emit(
+          'consume',
+          {
+            rtpCapabilities,
+          },
+          async (data) => {
+            const { producerId, id, kind, rtpParameters } = data;
+            const consumer = await transport.consume({
+              producerId,
+              id,
+              kind,
+              rtpParameters,
+            });
+            const stream = new MediaStream();
+            stream.addTrack(consumer.track);
+            console.log(stream.getAudioTracks());
+            resolve({ stream, consumer });
+          },
+        );
+      },
+    );
   }
 }
