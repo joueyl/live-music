@@ -14,6 +14,7 @@ if (isDownloaded) process.exit(0);
 let url = '';
 switch (platform()) {
   case 'win32':
+    
     url =
       'https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl-shared.zip';
     break;

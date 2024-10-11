@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
-import { RoomModule } from './room/room.module';
-import {SocketModule} from './socket/socket.module'
+import { MusicModule } from './music/music.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -10,9 +9,7 @@ import {SocketModule} from './socket/socket.module'
       envFilePath: '.env',
     }),
     UserModule,
-    RoomModule,
-    SocketModule
-  ],
-  providers: []
+    MusicModule
+  ]
 })
 export class AppModule {}
