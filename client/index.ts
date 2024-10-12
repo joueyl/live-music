@@ -1,4 +1,5 @@
 // import { Mediasoup } from './mediasoup';
+import {io} from 'socket.io-client'
 const button = document.querySelector('#start') as HTMLButtonElement;
 button.onclick =async () => {
   const peer = new RTCPeerConnection({
@@ -21,9 +22,10 @@ button.onclick =async () => {
     }),
     headers:{
       "content-type":"application/json",
-      Authorization:'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjEwNTI1MDgxMzhAcXEuY29tIiwiaWF0IjoxNzI2ODAxNzY5LCJleHAiOjE3MjkzOTM3Njl9.V6Zt6-30_U6CFds2FQinF-41YSMm_Qhik3dw3MWjN_w'
+      Authorization:'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjEwNTI1MDgxMzhAcXEuY29tIiwiaWF0IjoxNzI4NzAzODE4LCJleHAiOjE3MzEyOTU4MTh9.dtXjVnUbtitF6XHoo8rL9XlGmjqAyM51Na9k_rm_bdo'
     }
   }).then((res)=>res.json()).then((res)=>{
     peer.setRemoteDescription({type:'answer',sdp:res.data})
   })
 };
+const socket = io('/')

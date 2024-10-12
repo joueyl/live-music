@@ -15,4 +15,10 @@ export class SessionService {
     async clearOldToken(email:string){
         const newToken =await this.sessionDB.deleteMany({email})
     }
+    async getUser(token:string){
+       const currentToken = token.split(' ')[1]
+      const res = await this.sessionDB.findOne({token:currentToken})
+      res.token = null
+     return res
+    }
 }

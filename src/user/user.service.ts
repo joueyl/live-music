@@ -43,6 +43,7 @@ export class UserService {
   async login(body:LoginParams,req:Request){
     // throw new HttpException("error",HttpStatus.FOUND)
     const isExist =await this.userdb.login(body)
+    console.log(isExist);
     if(!isExist) throw new BadRequestException('未注册')
     const isVerify =await compare(body.pass_word,isExist.pass_word)
     if(!isVerify) throw new BadRequestException('账号或密码错误')

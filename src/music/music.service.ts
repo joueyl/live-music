@@ -31,13 +31,13 @@ export class MusicService {
   }
   async getList() {
     const allMusic = this.minio.client.listObjects('musics');
-    return await new Promise((resolve) => {
-      const data = [];
-      allMusic.on('data', (obj) => {
+    return await new Promise<{name:string}[]>((resolve) => {
+      const data:{name:string}[] = [];
+      allMusic.on('data', (obj:{name:string}) => {
         data.push(obj);
       });
       allMusic.on('end', () => {
-        if (this.isFirst) {
+        if (this.isFirst&&data.length) {
           this.musicList = data;
           this.publish('musics', data[0].name as string);
           this.isFirst = false
@@ -58,7 +58,9 @@ export class MusicService {
       await this.ffmpeg.publishRTMP(readStream)
       this.ffmpeg.ffmpegProcess.on('end',()=>{
         this.musicList.shift()
-        this.publish('musics',this.musicList[0].name)
+        if(this.musicList[0]){
+          this.publish('musics',this.musicList[0].name)
+        }
       })
     } catch (error) {
       console.log(error);
@@ -78,5 +80,12 @@ export class MusicService {
         resolve(musicArr);
       });
     });
+  }
+  async uploadMusic(file:Express.Multer.File){
+    const readStream = new Readable()
+    readStream.push(file.buffer)
+    readStream.push(null)
+    readStream._read = ()=>{}
+   return await this.minio.client.putObject('musics',file.originalname,readStream,file.size)
   }
 }

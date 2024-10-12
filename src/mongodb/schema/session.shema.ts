@@ -20,5 +20,8 @@ export class Session extends Document{
 
     @Prop({required:true,type:String})
     token:string
+
+    @Prop({required:true,type:String})
+    user_name:string
 }
 export const sessionShema = SchemaFactory.createForClass(Session)

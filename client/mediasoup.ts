@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { Device } from 'mediasoup-client';
 import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
 import { Transport } from 'mediasoup-client/lib/Transport';

@@ -3,3 +3,7 @@ export class SPD{
     @IsString()
     readonly spd:string
 }
+export class Play{
+    @IsString()
+    name:string
+}

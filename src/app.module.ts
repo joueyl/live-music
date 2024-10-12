@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import { MusicModule } from './music/music.module';
+import { SocketGateway } from './socket/socket.gateway';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -10,6 +11,7 @@ import { MusicModule } from './music/music.module';
     }),
     UserModule,
     MusicModule
-  ]
+  ],
+  providers: [SocketGateway]
 })
 export class AppModule {}
