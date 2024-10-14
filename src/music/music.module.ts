@@ -26,9 +26,6 @@ import { MulterModule } from '@nestjs/platform-express';
     },
   })],
   controllers: [MusicController],
-  providers: [MusicService,{
-    provide:APP_GUARD,
-    useClass:Jwt
-  },FfmpegService,SocketGateway],
+  providers: [MusicService,FfmpegService,SocketGateway],
 })
 export class MusicModule {}

@@ -8,12 +8,13 @@ export class FfmpegService {
   ffmpeg = Ffmpeg;
   ffmpegProcess:Ffmpeg.FfmpegCommand
   constructor(private readonly config: ConfigService) {
+    
     const ffmpegPath = resolve(
       process.cwd(),
       `./ffmpeg/${process.platform}/bin/ffmpeg`,
     );
-    this.ffmpeg.setFfmpegPath(ffmpegPath);
-    this.ffmpeg.setFfprobePath(ffmpegPath);
+  //  this.ffmpeg.setFfmpegPath(ffmpegPath);
+  //   this.ffmpeg.setFfprobePath(ffmpegPath);
   }
   async publishRTMP(readStream: Readable) {
     this.ffmpegProcess = this.ffmpeg(readStream)
