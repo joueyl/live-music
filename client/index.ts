@@ -22,7 +22,7 @@ button.onclick =async () => {
     }),
     headers:{
       "content-type":"application/json",
-      Authorization:'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjEwNTI1MDgxMzhAcXEuY29tIiwiaWF0IjoxNzI4NzAzODE4LCJleHAiOjE3MzEyOTU4MTh9.dtXjVnUbtitF6XHoo8rL9XlGmjqAyM51Na9k_rm_bdo'
+      Authorization:'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjEwNTI1MDgxMzhAcXEuY29tIiwiaWF0IjoxNzI4ODkwMzc0LCJleHAiOjE3MzE0ODIzNzR9.QuF5kWAbTv9JYS0a3uEsLhmQGsls3wausLkRTCodIBA'
     }
   }).then((res)=>res.json()).then((res)=>{
     peer.setRemoteDescription({type:'answer',sdp:res.data})
