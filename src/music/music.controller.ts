@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   Headers,
   UploadedFiles,
+  UseGuards,
 } from '@nestjs/common';
 
 import { MusicService } from './music.service';
@@ -22,7 +23,9 @@ import { Play, SPD } from './dto/music.dto';
 import { ValidataBody } from 'src/decorator/ValidateBody';
 import { SocketGateway } from '../socket/socket.gateway';
 import { SessionService } from 'src/mongodb/Session.service';
+import { Jwt } from 'src/decorator/ValidateToken';
 @Controller('music')
+@UseGuards(Jwt)
 export class MusicController {
   constructor(
     private readonly musicService: MusicService,

@@ -25,9 +25,8 @@ export class UserService {
     if (isEmailExist.length) throw new BadRequestException('邮箱已被注册');
     if (!isExist.length) throw new BadRequestException('验证码无效');
     const pass_word = await hash(body.pass_word, 10);
-    this.userdb.addUser({ ...body, pass_word });
-    const session = this.createToken(body,req)
-    return session;
+    await this.userdb.addUser({ ...body, pass_word });
+    return await this.login(body,req)
   }
   async sendCode(email: string) {
     const isexist = await this.codedb.findUserCode(email);
@@ -37,13 +36,11 @@ export class UserService {
     } else {
       await this.codedb.deleteCode(email);
     }
-    this.mailservice.sendMail(email,code)
-    return null;
+    return this.mailservice.sendMail(email,code)
   }
   async login(body:LoginParams,req:Request){
     // throw new HttpException("error",HttpStatus.FOUND)
     const isExist =await this.userdb.login(body)
-    console.log(isExist);
     if(!isExist) throw new BadRequestException('未注册')
     const isVerify =await compare(body.pass_word,isExist.pass_word)
     if(!isVerify) throw new BadRequestException('账号或密码错误')

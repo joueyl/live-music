@@ -7,12 +7,12 @@ export class MailService {
     private transport:Transporter
     constructor(private readonly configService:ConfigService){
         this.transport = nodemailer.createTransport({
-            host:configService.get('SMTP_HOST'),
-            port:configService.get('SMTP_PORT'),
-            secure:false,
+            host:this.configService.get('SMTP_HOST'),
+            port:this.configService.get('SMTP_PORT'),
+            secure:true,
             auth:{
-                user:configService.get('SMTP_USER'),
-                pass:configService.get('SMTP_PASS')
+                user:this.configService.get('SMTP_USER'),
+                pass:this.configService.get('SMTP_PASS')
             }
         })
     }

@@ -5,9 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { MinioService } from '../minio/minio.service';
 import { FfmpegService } from '../ffmpeg/ffmpeg.service';
 import { Readable } from 'stream';
-import { Jwt } from 'src/decorator/ValidateToken';
 @Injectable()
-@UseGuards(Jwt)
 export class MusicService {
   isFirst = true;
   musicList = [];
