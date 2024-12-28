@@ -5,63 +5,63 @@ import { firstValueFrom } from 'rxjs';
 import { MinioService } from '../minio/minio.service';
 import { FfmpegService } from '../ffmpeg/ffmpeg.service';
 import { Readable } from 'stream';
+import {SocketGateway} from '../socket/socket.gateway'
 @Injectable()
 export class MusicService {
-  isFirst = true;
-  musicList = [];
+  currentMusic: string | null = null
+  playList:{ name: string }[] = [];
   constructor(
     private readonly http: HttpService,
     private readonly config: ConfigService,
     private readonly minio: MinioService,
-   readonly ffmpeg: FfmpegService,
+    readonly ffmpeg: FfmpegService,
+    private readonly socket:SocketGateway
   ) {
-    this.getList();
-    
+    this.init()
   }
-  async getSpd(spd: string) {
-    const whep_url = this.config.get('WHEP_URL');
-    const { data } = await firstValueFrom(
-      this.http.post(whep_url, spd, {
-        headers: {
-          'Content-Type': 'application/spd',
-        },
-      }),
-    );
-    return data;
-  }
+  /**
+   * 获取oss
+   */
   async getList() {
     const allMusic = this.minio.client.listObjects('musics');
-    return await new Promise<{name:string}[]>((resolve) => {
-      const data:{name:string}[] = [];
-      allMusic.on('data', (obj:{name:string}) => {
+    return await new Promise<{ name: string }[]>((resolve) => {
+      const data: { name: string }[] = [];
+      allMusic.on('data', (obj: { name: string }) => {
         data.push(obj);
       });
       allMusic.on('end', () => {
-        if (this.isFirst&&data.length) {
-          this.musicList = data;
-          this.publish('musics', data[0].name as string);
-          this.isFirst = false
-        }
         resolve(data);
       });
     });
   }
-  async publish(bucketName: string, objectName: string) {
+  async publish(bucketName: string, objectName: string,immediate:boolean=false) {
     try {
+
       const stream = await this.getMusicStream(bucketName, objectName);
       const combinedBuffer = Buffer.concat(stream);
-      console.log('开始播放',objectName);
       const readStream = new Readable();
-      readStream._read = () => {};
+      readStream._read = () => { };
       readStream.push(combinedBuffer);
       readStream.push(null);
       await this.ffmpeg.publishRTMP(readStream)
-      this.ffmpeg.ffmpegProcess.on('end',()=>{
-        this.musicList.shift()
-        if(this.musicList[0]){
-          this.publish('musics',this.musicList[0].name)
+      this.ffmpeg.ffmpegProcess.on('start', () => {
+        console.log('开始播放:', objectName);
+      })
+      this.ffmpeg.ffmpegProcess.on('progress', (res) => {
+        const [hour, minutes, seconds] = res.timemark.split(':')
+        const s = Number(seconds)
+        if(s>=5&&s<5.2){
+          this.currentMusic = objectName
+          this.socket.handleUpdate({
+            ...this.playList.find((item)=>item.name==objectName),
+            immediate
+          })
         }
       })
+      this.ffmpeg.ffmpegProcess.on('end', () => {
+        this.autoPlay(objectName)
+      })
+      
     } catch (error) {
       console.log(error);
     }
@@ -81,11 +81,26 @@ export class MusicService {
       });
     });
   }
-  async uploadMusic(file:Express.Multer.File){
+  async uploadMusic(file: Express.Multer.File) {
     const readStream = new Readable()
     readStream.push(file.buffer)
     readStream.push(null)
-    readStream._read = ()=>{}
-   return await this.minio.client.putObject('musics',file.originalname,readStream,file.size)
+    readStream._read = () => { }
+    return await this.minio.client.putObject('musics', file.originalname, readStream, file.size)
+  }
+  /**
+   * 初始化,默认从oss列表的第一个开始播放
+   */
+  async init(){
+    this.playList = await this.getList()
+    this.publish('musics',this.playList[0].name,true)
+  }
+  async autoPlay(musicName:string){
+    const preIndex = this.playList.findIndex(item=>item.name == musicName)
+    const totail = this.playList.length
+    if(preIndex +1 < totail){
+      this.publish('musics',this.playList[preIndex +1 ].name)
+    }
+    
   }
 }

@@ -32,11 +32,6 @@ export class MusicController {
     private readonly socket: SocketGateway,
     private readonly session: SessionService,
   ) {}
-  @Post('get_spd')
-  @UseInterceptors(AnyFilesInterceptor())
-  async handleSpd(@Body() body: SPD) {
-    return await this.musicService.getSpd(body.spd);
-  }
   @Post('get_list')
   async handleGetList() {
     return this.musicService.getList();
@@ -55,7 +50,7 @@ export class MusicController {
       this.musicService.ffmpeg.ffmpegProcess
         .kill('SIGKILL')
         .on('error', (err) => {});
-      this.musicService.publish('musics', body.name);
+      this.musicService.publish('musics', body.name,true);
 
       this.socket.handleUpdate({
         operator: Operator.user_name,

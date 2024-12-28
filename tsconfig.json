@@ -20,5 +20,6 @@
     "typeRoots": ["./node_modules/@types", "./types"],
     
   },
-  "exclude": ["./client","./dist"]
+  "include": ["src/**/*"],
+  "exclude": ["./client","./dist","m3u8/**/*"]
 }
